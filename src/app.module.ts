@@ -16,6 +16,7 @@ import { ScheduleModule } from './schedule/schedule.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
