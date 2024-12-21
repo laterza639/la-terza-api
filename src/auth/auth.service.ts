@@ -26,26 +26,40 @@ export class AuthService {
       await this.userRepository.save(user);
       return {
         ...user,
-        token: this.getJwtToken({ id: user.id, email: user.email, branch: user.branch })
+        token: this.getJwtToken({ id: user.id, email: user.email, branch: user.branch, roles: user.roles })
       }
     } catch (error) {
       this.handleDbErrors(error);
     }
   }
 
+  async findAll() {
+    const users = await this.userRepository.find();
+
+    return users.map(drink => {
+      const { ...rest } = drink;
+      return {
+        ...rest,
+      };
+    });
+  }
+
   async login(loginUserDto: LoginUserDto) {
-    const { password, email } = loginUserDto;
+    const { password, email, branch } = loginUserDto;
     const user = await this.userRepository.findOne({
       where: { email },
       select: { email: true, password: true, id: true, roles: true, branch: true }
     });
 
     if (!user) throw new UnauthorizedException('Credenciales no validas');
+    if (user.branch !== branch && user.email !== 'luis@gmail.com') {
+      throw new UnauthorizedException('No tienes acceso a esta sucursal');
+    }
     if (!bcrypt.compareSync(password, user.password)) throw new UnauthorizedException('Credenciales no validas');
 
     return {
       ...user,
-      token: this.getJwtToken({ id: user.id, email: user.email, branch: user.branch })
+      token: this.getJwtToken({ id: user.id, email: user.email, branch: user.branch, roles: user.roles })
     }
   }
 
@@ -70,7 +84,8 @@ export class AuthService {
         token: this.getJwtToken({
           id: updatedUser.id,
           email: updatedUser.email,
-          branch: updatedUser.branch
+          branch: updatedUser.branch,
+          roles: updatedUser.roles
         })
       };
 
@@ -79,10 +94,14 @@ export class AuthService {
     }
   }
 
+  async remove(id: string) {
+    await this.userRepository.delete(id);
+  }
+
   checkAuthStatus(user: User) {
     return {
       ...user,
-      token: this.getJwtToken({ id: user.id, email: user.email, branch: user.branch })
+      token: this.getJwtToken({ id: user.id, email: user.email, branch: user.branch, roles: user.roles })
     }
   }
 

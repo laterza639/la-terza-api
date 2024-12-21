@@ -7,13 +7,13 @@ import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { fileFilter, fileNamer } from 'src/helpers';
 import { diskStorage } from 'multer';
- 
+
 @Controller('drinks')
 export class DrinksController {
   constructor(
     private readonly drinksService: DrinksService,
     private readonly configService: ConfigService
-  ) {}
+  ) { }
 
   @Get('file/:imageName')
   findProductImage(
@@ -69,9 +69,12 @@ export class DrinksController {
   }))
   async update(
     @Param('id') id: string,
-    @Body() updatedrinkDto: UpdateDrinkDto,
+    @Body() rawBody: any, // Change this temporarily to see raw data
     @UploadedFile() file: Express.Multer.File
   ) {
+    const updatedrinkDto = new UpdateDrinkDto();
+    Object.assign(updatedrinkDto, rawBody);
+
     if (file) {
       const secureUrl = `${this.configService.get('HOST_API')}/drink/file/${file.filename}`;
       updatedrinkDto.img = secureUrl;

@@ -69,9 +69,12 @@ export class SnacksController {
   }))
   async update(
     @Param('id') id: string,
-    @Body() updateSnackDto: UpdateSnackDto,
+    @Body() rawBody: any,
     @UploadedFile() file: Express.Multer.File
   ) {
+    const updateSnackDto = new UpdateSnackDto();
+    Object.assign(updateSnackDto, rawBody);
+
     if (file) {
       const secureUrl = `${this.configService.get('HOST_API')}/snack/file/${file.filename}`;
       updateSnackDto.img = secureUrl;

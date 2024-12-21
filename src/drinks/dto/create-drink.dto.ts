@@ -1,16 +1,33 @@
-import { IsDecimal, IsOptional, IsString, MinLength } from "class-validator";
+import { Transform } from "class-transformer";
+import { IsBoolean, IsDecimal, IsOptional, IsString, MinLength } from "class-validator";
 
 export class CreateDrinkDto {
   @IsString()
   @MinLength(3)
   name: string;
 
+  @IsDecimal()
+  @Transform(({ value }) => {
+    if (!value) return '0';
+    return value.toString();
+  })
+  price: number;
+
   @IsString()
   @MinLength(3)
   size: string;
+ 
+  @IsString()
+  @MinLength(1)
+  branch: string;
 
-  @IsDecimal()
-  price: number;
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => {
+    const stringValue = String(value).toLowerCase();
+    return stringValue !== 'false';
+  })
+  available?: boolean;
 
   @IsString()
   @IsOptional()

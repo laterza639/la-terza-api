@@ -6,7 +6,7 @@ export class Hamburguer {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('text', {unique: true})
+  @Column('text', { unique: true })
   name: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
@@ -15,7 +15,13 @@ export class Hamburguer {
   @Column('text')
   ingredients: string;
 
-  @OneToOne(() => HamburguerImage, (hamburguerImage) => hamburguerImage.hamburguer, {cascade: true, eager: true, onDelete: 'SET NULL'})
+  @Column('text')
+  branch: string;
+
+  @Column({ type: 'boolean', default: true })
+  available: boolean;
+
+  @OneToOne(() => HamburguerImage, (hamburguerImage) => hamburguerImage.hamburguer, { cascade: true, eager: true, onDelete: 'SET NULL' })
   @JoinColumn()
   img?: HamburguerImage;
 }

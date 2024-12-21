@@ -85,7 +85,7 @@ export class HamburguersService {
   }
 
   async update(id: string, updateHamburguerDto: UpdateHamburguerDto) {
-    const { img, ...toUpdate } = updateHamburguerDto;
+    const { img, available, ...toUpdate } = updateHamburguerDto;
     const hamburguer = await this.hamburguerRepository.findOne({
       where: { id },
       relations: ['img']
@@ -98,31 +98,34 @@ export class HamburguersService {
     await queryRunner.startTransaction();
 
     try {
-      // Update hamburguer fields
-      Object.assign(hamburguer, toUpdate);
+      if (available !== undefined) {
+        // Convert to string first then check for 'false'
+        hamburguer.available = String(available).toLowerCase() !== 'false';
+      }
+
+      // Update other fields
+      if (toUpdate.name) hamburguer.name = toUpdate.name;
+      if (toUpdate.price) hamburguer.price = toUpdate.price;
+      if (toUpdate.ingredients) hamburguer.ingredients = toUpdate.ingredients;
+      if (toUpdate.branch) hamburguer.branch = toUpdate.branch;
 
       if (img) {
         if (hamburguer.img) {
-          // Update existing image
           hamburguer.img.url = img;
           await queryRunner.manager.save(hamburguer.img);
         } else {
-          // Create new image
           const newImage = this.hamburguerImageRepository.create({ url: img });
           await queryRunner.manager.save(newImage);
           hamburguer.img = newImage;
         }
-
-        // Delete old image file if it exists
-        if (hamburguer.img && hamburguer.img.url !== img) {
-          await this.deleteImageFile(hamburguer.img.url);
-        }
       }
 
-      await queryRunner.manager.save(hamburguer);
+      await queryRunner.manager.save(Hamburguer, hamburguer);
       await queryRunner.commitTransaction();
 
-      return this.findOnePlain(id);
+      const result = await this.findOnePlain(id);
+
+      return result;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       this.handleDBExceptions(error);

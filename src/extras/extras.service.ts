@@ -12,7 +12,6 @@ export class ExtrasService {
   constructor(
     @InjectRepository(Extra)
     private extraRepository: Repository<Extra>,
-
     private readonly dataSource: DataSource
   ) { }
 
@@ -65,7 +64,7 @@ export class ExtrasService {
   }
 
   async update(id: string, updateExtraDto: UpdateExtraDto) {
-    const { ...toUpdate } = updateExtraDto;
+    const { available, ...toUpdate } = updateExtraDto;
     const extra = await this.extraRepository.findOne({ where: { id } });
 
     if (!extra) throw new NotFoundException(`Extra with id ${id} not found`);
@@ -75,13 +74,22 @@ export class ExtrasService {
     await queryRunner.startTransaction();
 
     try {
-      // Update extra fields
-      Object.assign(extra, toUpdate);
+      if (available !== undefined) {
+        // Convert to string first then check for 'false'
+        extra.available = String(available).toLowerCase() !== 'false';
+      }
 
-      await queryRunner.manager.save(extra);
+      // Update other fields
+      if (toUpdate.name) extra.name = toUpdate.name;
+      if (toUpdate.price) extra.price = toUpdate.price;
+      if (toUpdate.branch) extra.branch = toUpdate.branch;
+
+      await queryRunner.manager.save(Extra, extra);
       await queryRunner.commitTransaction();
 
-      return this.findOnePlain(id);
+      const result = await this.findOnePlain(id);
+
+      return result;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       this.handleDBExceptions(error);

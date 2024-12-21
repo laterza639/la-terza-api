@@ -85,7 +85,7 @@ export class DrinksService {
   }
 
   async update(id: string, updateDrinkDto: UpdateDrinkDto) {
-    const { img, ...toUpdate } = updateDrinkDto;
+    const { img, available, ...toUpdate } = updateDrinkDto;
     const drink = await this.drinkRepository.findOne({
       where: { id },
       relations: ['img']
@@ -98,31 +98,34 @@ export class DrinksService {
     await queryRunner.startTransaction();
 
     try {
-      // Update drink fields
-      Object.assign(drink, toUpdate);
+      if (available !== undefined) {
+        // Convert to string first then check for 'false'
+        drink.available = String(available).toLowerCase() !== 'false';
+      }
+
+      // Update other fields
+      if (toUpdate.name) drink.name = toUpdate.name;
+      if (toUpdate.size) drink.size = toUpdate.size;
+      if (toUpdate.price) drink.price = toUpdate.price;
+      if (toUpdate.branch) drink.branch = toUpdate.branch;
 
       if (img) {
         if (drink.img) {
-          // Update existing image
           drink.img.url = img;
           await queryRunner.manager.save(drink.img);
         } else {
-          // Create new image
           const newImage = this.drinkImageRepository.create({ url: img });
           await queryRunner.manager.save(newImage);
           drink.img = newImage;
         }
-
-        // Delete old image file if it exists
-        if (drink.img && drink.img.url !== img) {
-          await this.deleteImageFile(drink.img.url);
-        }
       }
 
-      await queryRunner.manager.save(drink);
+      await queryRunner.manager.save(Drink, drink);
       await queryRunner.commitTransaction();
 
-      return this.findOnePlain(id);
+      const result = await this.findOnePlain(id);
+
+      return result;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       this.handleDBExceptions(error);

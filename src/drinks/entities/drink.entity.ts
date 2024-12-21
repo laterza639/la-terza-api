@@ -15,6 +15,12 @@ export class Drink {
   @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
+  @Column('text')
+  branch: string;
+
+  @Column({ type: 'boolean', default: true })
+  available: boolean;
+
   @OneToOne(() => DrinkImage, (drinkImage) => drinkImage.drink, { cascade: true, eager: true, onDelete: 'SET NULL' })
   @JoinColumn()
   img?: DrinkImage;

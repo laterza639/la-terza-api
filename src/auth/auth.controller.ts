@@ -14,7 +14,12 @@ export class AuthController {
   createUser(@Body() createUserDto: CreateUserDto) {
     return this.authService.create(createUserDto);
   }
- 
+
+  @Get('users')
+  findAll() {
+    return this.authService.findAll();
+  }
+
   @Post('login')
   loginUser(
     @Body()
@@ -22,13 +27,17 @@ export class AuthController {
     return this.authService.login(loginUserDto);
   }
 
-  @Patch('update')
-  @Auth()
+  @Patch(':id')
   updateUser(
-    @GetUser() user: User,
+    @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto
   ) {
-    return this.authService.update(user.id, updateUserDto);
+    return this.authService.update(id, updateUserDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.authService.remove(id);
   }
 
   @Get('check-status')

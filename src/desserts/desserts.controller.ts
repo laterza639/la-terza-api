@@ -69,15 +69,18 @@ export class DessertsController {
   }))
   async update(
     @Param('id') id: string,
-    @Body() updatedessertDto: UpdateDessertDto,
+    @Body() rawBody: any,
     @UploadedFile() file: Express.Multer.File
   ) {
+    const updateDessertDto = new UpdateDessertDto();
+    Object.assign(updateDessertDto, rawBody);
+
     if (file) {
       const secureUrl = `${this.configService.get('HOST_API')}/dessert/file/${file.filename}`;
-      updatedessertDto.img = secureUrl;
+      updateDessertDto.img = secureUrl;
     }
 
-    return this.dessertsService.update(id, updatedessertDto);
+    return this.dessertsService.update(id, updateDessertDto);
   }
 
   @Delete(':id')

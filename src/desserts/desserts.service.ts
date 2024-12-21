@@ -85,7 +85,7 @@ export class DessertsService {
   }
 
   async update(id: string, updateDessertDto: UpdateDessertDto) {
-    const { img, ...toUpdate } = updateDessertDto;
+    const { img, available, ...toUpdate } = updateDessertDto;
     const dessert = await this.dessertRepository.findOne({
       where: { id },
       relations: ['img']

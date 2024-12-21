@@ -85,7 +85,7 @@ export class SnacksService {
   }
 
   async update(id: string, updateSnackDto: UpdateSnackDto) {
-    const { img, ...toUpdate } = updateSnackDto;
+    const { img, available, ...toUpdate } = updateSnackDto;
     const snack = await this.snackRepository.findOne({
       where: { id },
       relations: ['img']
@@ -98,31 +98,33 @@ export class SnacksService {
     await queryRunner.startTransaction();
 
     try {
-      // Update snack fields
-      Object.assign(snack, toUpdate);
+      if (available !== undefined) {
+        // Convert to string first then check for 'false'
+        snack.available = String(available).toLowerCase() !== 'false';
+      }
+
+      // Update other fields
+      if (toUpdate.name) snack.name = toUpdate.name;
+      if (toUpdate.price) snack.price = toUpdate.price;
+      if (toUpdate.branch) snack.branch = toUpdate.branch;
 
       if (img) {
         if (snack.img) {
-          // Update existing image
           snack.img.url = img;
           await queryRunner.manager.save(snack.img);
         } else {
-          // Create new image
           const newImage = this.snackImageRepository.create({ url: img });
           await queryRunner.manager.save(newImage);
           snack.img = newImage;
         }
-
-        // Delete old image file if it exists
-        if (snack.img && snack.img.url !== img) {
-          await this.deleteImageFile(snack.img.url);
-        }
       }
 
-      await queryRunner.manager.save(snack);
+      await queryRunner.manager.save(Snack, snack);
       await queryRunner.commitTransaction();
 
-      return this.findOnePlain(id);
+      const result = await this.findOnePlain(id);
+
+      return result;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       this.handleDBExceptions(error);

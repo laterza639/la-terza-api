@@ -8,7 +8,7 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { fileFilter, fileNamer } from 'src/helpers';
 import { diskStorage } from 'multer';
 
- 
+
 @Controller('hamburguers')
 export class HamburguersController {
   constructor(
@@ -42,7 +42,7 @@ export class HamburguersController {
       throw new BadRequestException('Make sure that the file is an image');
     }
 
-    const secureUrl = `${this.configService.get('HOST_API')}/hamburguer/file/${file.filename}`;
+    const secureUrl = `${this.configService.get('HOST_API')}/api/hamburguers/file/${file.filename}`;
 
     return this.hamburguersService.create({
       ...createHamburguerDto,
@@ -70,11 +70,15 @@ export class HamburguersController {
   }))
   async update(
     @Param('id') id: string,
-    @Body() updateHamburguerDto: UpdateHamburguerDto,
+    @Body() rawBody: any, // Change this temporarily to see raw data
     @UploadedFile() file: Express.Multer.File
   ) {
+    // Convert to DTO
+    const updateHamburguerDto = new UpdateHamburguerDto();
+    Object.assign(updateHamburguerDto, rawBody);
+
     if (file) {
-      const secureUrl = `${this.configService.get('HOST_API')}/hamburguer/file/${file.filename}`;
+      const secureUrl = `${this.configService.get('HOST_API')}/api/hamburguers/file/${file.filename}`;
       updateHamburguerDto.img = secureUrl;
     }
 

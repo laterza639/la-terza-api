@@ -12,10 +12,13 @@ export class ExtrasController {
   ) { }
 
   @Post()
-  async create(
-    @Body() createExtraDto: CreateExtraDto,
-  ) {
-    return this.extrasService.create(createExtraDto);
+  async create(@Body() createExtraDto: CreateExtraDto) {
+    const price = parseFloat(createExtraDto.price.toString());
+
+    return this.extrasService.create({
+      ...createExtraDto,
+      price
+    });
   }
 
   @Get()
@@ -33,6 +36,10 @@ export class ExtrasController {
     @Param('id') id: string,
     @Body() updateExtraDto: UpdateExtraDto,
   ) {
+    if (updateExtraDto.price) {
+      updateExtraDto.price = parseFloat(updateExtraDto.price.toString());
+    }
+
     return this.extrasService.update(id, updateExtraDto);
   }
 
