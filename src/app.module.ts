@@ -19,6 +19,7 @@ import { ScheduleModule } from './schedule/schedule.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
+      url: process.env.DATABASE_URL,
       host: process.env.DB_HOST,
       port: +process.env.DB_PORT,
       database: process.env.DB_NAME,
@@ -26,7 +27,9 @@ import { ScheduleModule } from './schedule/schedule.module';
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
       synchronize: true,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      ssl: {
+        rejectUnauthorized: false
+      }
     }),
     HamburguersModule,
     ExtrasModule,
