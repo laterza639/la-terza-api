@@ -13,16 +13,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    configService: ConfigService
+    private readonly configService: ConfigService
   ) {
     super({
-      secretOrKey: configService.get('JWT_SECRET'),
+      secretOrKey: configService.get<string>('JWT_SECRET'),
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    })
+    });
   }
 
   async validate(payload: JwtPayload): Promise<User> {
-
     const { id } = payload;
     const user = await this.userRepository.findOneBy({ id });
 
@@ -31,5 +30,4 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     return user;
   }
-
 }

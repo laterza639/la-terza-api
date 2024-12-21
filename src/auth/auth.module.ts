@@ -12,15 +12,19 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
   imports: [
-    ConfigModule,
+    ConfigModule.forRoot(), // Make sure ConfigModule is properly initialized
     TypeOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
+        const secret = configService.get('JWT_SECRET');
+        if (!secret) {
+          throw new Error('JWT_SECRET must be provided');
+        }
         return {
-          secret: configService.get('JWT_SECRET'),
+          secret: secret,
           signOptions: {
             expiresIn: '2h'
           }
