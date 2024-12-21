@@ -26,6 +26,7 @@ import { ScheduleModule } from './schedule/schedule.module';
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
       synchronize: true,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
     }),
     HamburguersModule,
     ExtrasModule,
