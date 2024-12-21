@@ -19,12 +19,14 @@ import { ScheduleModule } from './schedule/schedule.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL,
+      host: 'postgres.railway.internal',
+      port: 5432,
+      database: 'railway',
+      username: 'postgres',
+      password: 'QUVHAUznSSDYLBewiKexrRXuevFyyDHg',
       autoLoadEntities: true,
       synchronize: true,
-      ssl: {
-        rejectUnauthorized: false
-      }
+      ssl: false
     }),
     HamburguersModule,
     ExtrasModule,
