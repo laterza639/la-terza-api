@@ -13,29 +13,26 @@ export class ScheduleService {
   ) {}
 
   async create(createScheduleDto: CreateScheduleDto) {
-    // Validate that if one time of a shift is provided, both are provided
-    if (this.isInvalidShiftTime(createScheduleDto.morningOpenTime, createScheduleDto.morningCloseTime)) {
-      throw new BadRequestException('Both morning open and close times must be provided if one is set');
-    }
-    if (this.isInvalidShiftTime(createScheduleDto.eveningOpenTime, createScheduleDto.eveningCloseTime)) {
-      throw new BadRequestException('Both evening open and close times must be provided if one is set');
-    }
+    // Format time values to ensure HH:MM:00 format
+    const formattedDto = {
+      ...createScheduleDto,
+      morningOpenTime: createScheduleDto.morningOpenTime ? `${createScheduleDto.morningOpenTime}:00` : null,
+      morningCloseTime: createScheduleDto.morningCloseTime ? `${createScheduleDto.morningCloseTime}:00` : null,
+      eveningOpenTime: createScheduleDto.eveningOpenTime ? `${createScheduleDto.eveningOpenTime}:00` : null,
+      eveningCloseTime: createScheduleDto.eveningCloseTime ? `${createScheduleDto.eveningCloseTime}:00` : null,
+    };
 
-    // Check if at least one shift is provided
-    if (!this.hasValidShift(createScheduleDto)) {
-      throw new BadRequestException('At least one shift (morning or evening) must be provided');
-    }
-
+    // Rest of your create method...
     const existing = await this.scheduleRepository.findOneBy({
-      branch: createScheduleDto.branch
+      branch: formattedDto.branch
     });
 
     if (existing) {
-      Object.assign(existing, createScheduleDto);
+      Object.assign(existing, formattedDto);
       return this.scheduleRepository.save(existing);
     }
 
-    const schedule = this.scheduleRepository.create(createScheduleDto);
+    const schedule = this.scheduleRepository.create(formattedDto);
     return this.scheduleRepository.save(schedule);
   }
 
@@ -50,6 +47,14 @@ export class ScheduleService {
   async update(id: string, updateScheduleDto: UpdateScheduleDto) {
     const schedule = await this.scheduleRepository.findOneBy({ id });
     if (!schedule) throw new NotFoundException(`Schedule with ID ${id} not found`);
+
+    const formattedDto = {
+      ...updateScheduleDto,
+      morningOpenTime: updateScheduleDto.morningOpenTime ? `${updateScheduleDto.morningOpenTime}:00` : undefined,
+      morningCloseTime: updateScheduleDto.morningCloseTime ? `${updateScheduleDto.morningCloseTime}:00` : undefined,
+      eveningOpenTime: updateScheduleDto.eveningOpenTime ? `${updateScheduleDto.eveningOpenTime}:00` : undefined,
+      eveningCloseTime: updateScheduleDto.eveningCloseTime ? `${updateScheduleDto.eveningCloseTime}:00` : undefined,
+    };
 
     // Validate shift times if they are being updated
     if (updateScheduleDto.morningOpenTime !== undefined || updateScheduleDto.morningCloseTime !== undefined) {
@@ -79,7 +84,7 @@ export class ScheduleService {
       throw new BadRequestException('At least one shift (morning or evening) must be provided');
     }
 
-    Object.assign(schedule, updateScheduleDto);
+    Object.assign(schedule, formattedDto);
     return this.scheduleRepository.save(schedule);
   }
 
