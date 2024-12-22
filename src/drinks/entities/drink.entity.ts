@@ -6,7 +6,7 @@ export class Drink {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('text', { unique: true })
+  @Column('text')
   name: string;
 
   @Column('text')

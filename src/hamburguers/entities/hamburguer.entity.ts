@@ -6,7 +6,7 @@ export class Hamburguer {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('text', { unique: true })
+  @Column('text')
   name: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
