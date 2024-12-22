@@ -101,12 +101,19 @@ export class ScheduleService {
 
     if (!schedule) return false;
 
+    // Create date with Bolivia Time (UTC-4)
     const now = new Date();
-    const currentTime = now.toLocaleTimeString('en-US', {
+    const boliviaOptions: Intl.DateTimeFormatOptions = {
+      timeZone: 'America/La_Paz',
       hour12: false,
       hour: '2-digit',
       minute: '2-digit'
-    });
+    };
+
+    const currentTime = now.toLocaleTimeString('en-US', boliviaOptions);
+
+    console.log('Current time (Bolivia):', currentTime);
+    console.log('Schedule:', schedule);
 
     const isMorningShift = Boolean(
       schedule.morningOpenTime &&
