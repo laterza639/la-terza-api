@@ -69,7 +69,7 @@ export class ScheduleService {
       const eveningOpenTime = updateScheduleDto.eveningOpenTime ?? schedule.eveningOpenTime;
       const eveningCloseTime = updateScheduleDto.eveningCloseTime ?? schedule.eveningCloseTime;
       if (this.isInvalidShiftTime(eveningOpenTime, eveningCloseTime)) {
-        throw new BadRequestException('Both evening open and close times must be provided if one is set');
+        throw new BadRequestException('Both evening open and close times must be provided if one is set.');
       }
     }
 
