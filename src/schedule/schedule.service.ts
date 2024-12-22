@@ -12,17 +12,22 @@ export class ScheduleService {
     private scheduleRepository: Repository<Schedule>,
   ) {}
 
+  private formatTime(time: string | null | undefined): string | null {
+    if (!time) return null;
+    // Ensure time is in HH:MM format
+    const [hours, minutes] = time.split(':');
+    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+  }
+
   async create(createScheduleDto: CreateScheduleDto) {
-    // Format time values to ensure HH:MM:00 format
     const formattedDto = {
       ...createScheduleDto,
-      morningOpenTime: createScheduleDto.morningOpenTime ? `${createScheduleDto.morningOpenTime}:00` : null,
-      morningCloseTime: createScheduleDto.morningCloseTime ? `${createScheduleDto.morningCloseTime}:00` : null,
-      eveningOpenTime: createScheduleDto.eveningOpenTime ? `${createScheduleDto.eveningOpenTime}:00` : null,
-      eveningCloseTime: createScheduleDto.eveningCloseTime ? `${createScheduleDto.eveningCloseTime}:00` : null,
+      morningOpenTime: this.formatTime(createScheduleDto.morningOpenTime),
+      morningCloseTime: this.formatTime(createScheduleDto.morningCloseTime),
+      eveningOpenTime: this.formatTime(createScheduleDto.eveningOpenTime),
+      eveningCloseTime: this.formatTime(createScheduleDto.eveningCloseTime),
     };
 
-    // Rest of your create method...
     const existing = await this.scheduleRepository.findOneBy({
       branch: formattedDto.branch
     });
@@ -50,10 +55,10 @@ export class ScheduleService {
 
     const formattedDto = {
       ...updateScheduleDto,
-      morningOpenTime: updateScheduleDto.morningOpenTime ? `${updateScheduleDto.morningOpenTime}:00` : undefined,
-      morningCloseTime: updateScheduleDto.morningCloseTime ? `${updateScheduleDto.morningCloseTime}:00` : undefined,
-      eveningOpenTime: updateScheduleDto.eveningOpenTime ? `${updateScheduleDto.eveningOpenTime}:00` : undefined,
-      eveningCloseTime: updateScheduleDto.eveningCloseTime ? `${updateScheduleDto.eveningCloseTime}:00` : undefined,
+      morningOpenTime: this.formatTime(updateScheduleDto.morningOpenTime),
+      morningCloseTime: this.formatTime(updateScheduleDto.morningCloseTime),
+      eveningOpenTime: this.formatTime(updateScheduleDto.eveningOpenTime),
+      eveningCloseTime: this.formatTime(updateScheduleDto.eveningCloseTime),
     };
 
     // Validate shift times if they are being updated

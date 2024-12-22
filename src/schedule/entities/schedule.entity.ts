@@ -5,16 +5,16 @@ export class Schedule {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('time without time zone', { nullable: true })
+  @Column('varchar', { nullable: true, length: 8 })
   morningOpenTime: string | null;
 
-  @Column('time without time zone', { nullable: true })
+  @Column('varchar', { nullable: true, length: 8 })
   morningCloseTime: string | null;
 
-  @Column('time without time zone', { nullable: true })
+  @Column('varchar', { nullable: true, length: 8 })
   eveningOpenTime: string | null;
 
-  @Column('time without time zone', { nullable: true })
+  @Column('varchar', { nullable: true, length: 8 })
   eveningCloseTime: string | null;
 
   @Column('boolean', { default: true })
